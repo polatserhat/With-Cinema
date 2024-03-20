@@ -8,53 +8,47 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = MoviesViewModel()
+    @State private var searchText = ""
+
+    let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 3)
 
     var body: some View {
-        NavigationView {
-            List(viewModel.movies, id: \.id) { movie in
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(movie.title)
-                        .font(.title)
-                        .bold()
-                    
-                    AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w500\(movie.posterPath)")) { image in
-                        image.resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 200, height: 200)
-                    } placeholder: {
-                        ProgressView()
+        TabView {
+            NavigationView {
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(viewModel.movies, id: \.id) { movie in
+                            VStack {
+                                NavigationLink(destination: MovieDetailView(movie: movie,viewModel: viewModel)) {
+                                    AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w500\(movie.posterPath)")) { image in
+                                        image.resizable()
+                                             .aspectRatio(2/3, contentMode: .fit) // Adjusted aspect ratio for portrait-like posters
+                                             .cornerRadius(8) // Rounded corners
+                                    } placeholder: {
+                                       ProgressView()
+                                        
+                                    }
+                                }
+                            }
+                        }
                     }
-                    .frame(width: 100, height: 150)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    
-                    Text(movie.adult ? "Adult" : "Family Friendly")
-                        .font(.subheadline)
-                        .foregroundColor(movie.adult ? .red : .green)
-                    
-                    Text(truncateOverview(overview: movie.overview))
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                    
-                    NavigationLink(destination: MovieDetailView(movie: movie)) {
-                        Text("See Details")
-                            .fontWeight(.semibold)
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                    }
+                    .padding(.horizontal)
                 }
-                .padding(.vertical)
+                .navigationTitle("Popular Movies")
             }
-            .navigationTitle("Popular Movies")
+            .searchable(text: $searchText)
+            .tabItem {
+                Label("Movies", systemImage: "film")
+            }
+        
+            Text("Settings or other feature")
+            .tabItem {
+            Label("Settings", systemImage: "gear")
+                    }
             
-            .preferredColorScheme(.dark)
-            .onAppear {
-                viewModel.fetchMovies()
-            }
+            
         }
-    }
-    
-    private func truncateOverview(overview: String) -> String {
-        let sentences = overview.components(separatedBy: ". ").prefix(3)
-        return sentences.joined(separator: ". ") + (sentences.count >= 3 ? "..." : "")
+        .preferredColorScheme(.dark) // Ensures dark mode
     }
 }
 
@@ -63,6 +57,10 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
+
+
+
 
 
     
