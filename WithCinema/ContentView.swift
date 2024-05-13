@@ -19,7 +19,7 @@ struct ContentView: View {
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(viewModel.movies, id: \.id) { movie in
                             VStack {
-                                NavigationLink(destination: MovieDetailView(movie: movie,viewModel: viewModel)) {
+                                NavigationLink(destination: MovieDetailView(viewModel:viewModel,movie: movie)) {
                                     AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w500\(movie.posterPath)")) { image in
                                         image.resizable()
                                              .aspectRatio(2/3, contentMode: .fit) // Adjusted aspect ratio for portrait-like posters
@@ -40,10 +40,11 @@ struct ContentView: View {
             .tabItem {
                 Label("Movies", systemImage: "film")
             }
+                    
         
             Text("Settings or other feature")
             .tabItem {
-            Label("Settings", systemImage: "gear")
+            Label("Favourites", systemImage: "heart")
                     }
             
             
