@@ -3,6 +3,11 @@
 //
 // Created by Serhat on 13.05.24.
 //
+
+
+
+
+
 import SwiftUI
 import FirebaseAuth
 
@@ -12,9 +17,9 @@ struct LoginView: View {
     @State private var isAttemptingLogin = false
     @State private var showError = false
     @State private var errorMessage = ""
-    @State private var showingSignUp = false  // This will control the display of the SignUpView
     @EnvironmentObject var authManager: AuthManager
-
+    @State private var isPresentingSignUp = false
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -36,18 +41,21 @@ struct LoginView: View {
                 } else {
                     Button("Log In", action: loginUser)
                         .buttonStyle(RoundedRectangleButtonStyle(backgroundColor: Color.blue))
-
+                    
                     Button("Sign Up") {
-                        showingSignUp = true  // Set this to true to navigate to SignUpView
+                        isPresentingSignUp = true
                     }
                     .buttonStyle(RoundedRectangleButtonStyle(backgroundColor: Color.green))
                 }
-                NavigationLink(destination: SignUpView(), isActive: $showingSignUp) { EmptyView() }
+            }
+            .sheet(isPresented: $isPresentingSignUp) {
+                SignUpView(isPresentingSignUp: $isPresentingSignUp)
+                    .environmentObject(authManager)
             }
             .padding()
             .background(Color(UIColor.systemBackground))
             .cornerRadius(10)
-            .shadow(color: .gray.opacity(0.4), radius: 10, x: 0, y: 10)
+           // .shadow(color: .gray.opacity(0.4), radius: 10, x: 0, y: 10)
             .navigationTitle("Login")
             .navigationBarHidden(true)
             .alert(isPresented: $showError) {
@@ -68,22 +76,22 @@ struct LoginView: View {
         }
     }
 }
-// Custom Button Style for Rounded Rectangular Buttons
+
 struct RoundedRectangleButtonStyle: ButtonStyle {
     var backgroundColor: Color
+    var foregroundColor: Color = .white
 
-    func makeBody(configuration: Self.Configuration) -> some View {
+    func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .padding()
             .background(backgroundColor)
-            .foregroundColor(.white)
+            .foregroundColor(foregroundColor)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
             .animation(.easeOut, value: configuration.isPressed)
     }
 }
 
-// SwiftUI Preview Provider
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
         LoginView().environmentObject(AuthManager.shared)

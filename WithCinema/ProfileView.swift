@@ -1,4 +1,3 @@
-
 // ProfileView.swift
 // WithCinema
 //
@@ -7,36 +6,35 @@
 
 
 
-
 import SwiftUI
 import FirebaseAuth
+import FirebaseFirestore
 
 struct ProfileView: View {
     @EnvironmentObject var authManager: AuthManager
+    @State private var userName = ""
+    @State private var userSurname = ""
 
     var body: some View {
         NavigationView {
             VStack {
                 if let user = Auth.auth().currentUser {
-                    // Profile Picture Placeholder
                     Image(systemName: "person.crop.circle.fill")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 100, height: 100)
                         .padding(.top, 20)
 
-                    // User Details
                     VStack(spacing: 10) {
                         Text("Email: \(user.email ?? "Unknown")")
                             .font(.title2)
                             .fontWeight(.medium)
 
-                       
-                        Text("Name: \(UserDefaults.standard.string(forKey: "userName") ?? "Not set")")
+                        Text("Name: \(userName)")
                             .font(.title2)
                             .fontWeight(.medium)
 
-                        Text("Surname: \(UserDefaults.standard.string(forKey: "userSurname") ?? "Not set")")
+                        Text("Surname: \(userSurname)")
                             .font(.title2)
                             .fontWeight(.medium)
                     }
@@ -44,7 +42,6 @@ struct ProfileView: View {
 
                     Spacer()
 
-                    // Logout Button
                     Button("Log Out") {
                         authManager.logout()
                     }
@@ -67,6 +64,23 @@ struct ProfileView: View {
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .preferredColorScheme(.dark)
+            .onAppear {
+                fetchUserDetails()
+            }
+        }
+    }
+
+    private func fetchUserDetails() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        db.collection("users").document(userId).getDocument { document, error in
+            if let document = document, document.exists {
+                let data = document.data()
+                userName = data?["name"] as? String ?? "Not set"
+                userSurname = data?["surname"] as? String ?? "Not set"
+            } else {
+                print("Document does not exist")
+            }
         }
     }
 }
