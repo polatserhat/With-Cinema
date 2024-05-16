@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var authManager: AuthManager
     @StateObject private var viewModel = MoviesViewModel()
     @State private var searchText = ""
 
@@ -48,6 +49,12 @@ struct ContentView: View {
                     }
             
             
+            ProfileView() // Use ProfileView here
+            .tabItem {
+            Label("Profile", systemImage: "person")
+                    }
+            
+            
         }
         .preferredColorScheme(.dark) // Ensures dark mode
     }
@@ -56,6 +63,7 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .environmentObject(AuthManager.shared)
     }
 }
 
